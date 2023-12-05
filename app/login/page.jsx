@@ -1,12 +1,16 @@
 'use client'
 import React, { useState } from 'react';
 import Image from 'next/image'
-import { axios } from 'axios';
+import axios from 'axios';
 import { SpinnerGap } from "@phosphor-icons/react";
+import toast, { Toaster } from 'react-hot-toast';
+import Modal from '@/components/Modal';
 
 const LoginPage = () => {
-    const [show, setShow] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -26,23 +30,25 @@ const LoginPage = () => {
         const authPassword = "ff427eeb-f60a-46c0-995e-7f1daa355eb8";
         const base64Credentials = btoa(authUsername + ":" + authPassword);
 
-        fetch('http://192.168.0.186:3004/auth/signin', {
-            method: 'POST',
+        axios.post('http://192.168.0.186:3004/auth/signin', authInfo, {
             headers: {
-                'Authorization': `Basic ${base64Credentials}`,
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(authInfo)
+                Authorization: `Basic ${base64Credentials}`,
+            }
         })
-            .then(res => res.json())
-            .then((data) => {
-                console.log(data);
+            .then((res) => {
+                console.log(res.data);
                 setLoading(false);
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                toast.error(e.response.data.message);
+                setLoading(false);
+            })
     }
 
-    console.log(loading);
+    const handleForgotPassword = () => {
+        setShowModal(true);
+
+    }
     return (
         <section className='bg-[#f8f9fb] h-screen flex justify-center items-center'>
             <div>
@@ -64,10 +70,10 @@ const LoginPage = () => {
                     <div className=''>
                         <label className='pb-2 text-sm font-medium block'>Password</label>
                         <div className='flex justify-between items-center w-full border px-3 py-2 rounded-lg'>
-                            <input name='password' className=' focus:outline-none' type={`${show ? 'text' : 'password'}`} placeholder="Password" />
-                            <div onClick={() => setShow(!show)}>
+                            <input name='password' className=' focus:outline-none' type={`${showPassword ? 'text' : 'password'}`} placeholder="Password" />
+                            <div onClick={() => setShowPassword(!showPassword)}>
                                 {
-                                    show ? <>
+                                    showPassword ? <>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg>
                                     </> :
                                         <>
@@ -77,15 +83,20 @@ const LoginPage = () => {
                             </div>
                         </div>
                     </div>
-                    <p className='text-sm text-[#17494d] font-medium mt-6 text-right cursor-pointer'>Forgot password?</p>
+                    <p className='flex justify-end items-end text-sm text-[#17494d] font-medium mt-6 cursor-pointer' onClick={handleForgotPassword}>Forgot password?</p>
                     <button type='submit' className='w-full mt-6 py-3 flex items-center justify-center gap-2 bg-[#17494d] text-white rounded-lg '>
                         Sign In
                         {
-                            loading ? <SpinnerGap className='inline-block animate-spin rounded-full  motion-reduce:animate-[spin_1.5s_linear_infinite]' size={20} color="white" />: null
+                            loading ? <SpinnerGap className='inline-block animate-spin rounded-full  motion-reduce:animate-[spin_1.5s_linear_infinite]' size={20} color="white" /> : null
                         }
                     </button>
                 </form>
             </div>
+            <Modal
+                showModal={showModal}
+                setShowModal={setShowModal}
+            />
+            <Toaster position="top-right" />
         </section>
     );
 };
