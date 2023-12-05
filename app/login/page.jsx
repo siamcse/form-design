@@ -5,13 +5,28 @@ import axios from 'axios';
 import { SpinnerGap } from "@phosphor-icons/react";
 import toast, { Toaster } from 'react-hot-toast';
 import Modal from '@/components/Modal';
+import { useMutation } from '@tanstack/react-query';
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
+    const authUsername = "650307ae3b81447e5d793425";
+    const authPassword = "ff427eeb-f60a-46c0-995e-7f1daa355eb8";
+    const base64Credentials = btoa(authUsername + ":" + authPassword);
 
+    const { mutate,isPending,failureReason } = useMutation({
+        mutationFn: (authInfo) => {
+            return axios.post('http://192.168.0.186:3004/auth/signin', authInfo, {
+                headers: {
+                    Authorization: `Basic ${base64Credentials}`,
+                }
+            });
+        },
+    });
+    console.log(failureReason);
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         const email = e.target.email.value;
@@ -26,23 +41,16 @@ const LoginPage = () => {
             refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTAyYmEwNDg4NjQxNzUxMDE4NmFkNmEiLCJ1c2VyVHlwZSI6ImFkbWluIiwiY2xpZW50SWQiOiI2NTAzMDdhZTNiODE0NDdlNWQ3OTM0MjUiLCJlbWFpbCI6IjZzZW5zZWV2QGdtYWlsLmNvbSIsImlhdCI6MTY5NTM1OTE3OSwiZXhwIjoxNjk1MzU5Nzc5fQ.x6tNWy3Hz1BUM_PS0jpBwSWm7RHWtNks3o-UuJCUMcI"
         }
 
-        const authUsername = "650307ae3b81447e5d793425";
-        const authPassword = "ff427eeb-f60a-46c0-995e-7f1daa355eb8";
-        const base64Credentials = btoa(authUsername + ":" + authPassword);
-
-        axios.post('http://192.168.0.186:3004/auth/signin', authInfo, {
-            headers: {
-                Authorization: `Basic ${base64Credentials}`,
-            }
-        })
-            .then((res) => {
-                console.log(res.data);
-                setLoading(false);
-            })
-            .catch(e => {
+        mutate(authInfo, {
+            onSuccess: (data) => {
+                console.log(data);
+                setLoading(false)
+            },
+            onError: (e) => {
                 toast.error(e.response.data.message);
                 setLoading(false);
-            })
+            }
+        })
     }
 
     const handleForgotPassword = () => {
