@@ -25,7 +25,6 @@ const LoginPage = () => {
             });
         },
     });
-    console.log(failureReason);
     
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -77,8 +76,8 @@ const LoginPage = () => {
                     </div>
                     <div className=''>
                         <label className='pb-2 text-sm font-medium block'>Password</label>
-                        <div className='flex justify-between items-center w-full border px-3 py-2 rounded-lg'>
-                            <input name='password' className=' focus:outline-none' type={`${showPassword ? 'text' : 'password'}`} placeholder="Password" />
+                        <div className='flex justify-between items-center w-full border  rounded-lg'>
+                            <input name='password' className='w-full px-3 py-2 rounded-lg focus:outline-none' type={`${showPassword ? 'text' : 'password'}`} placeholder="Password" />
                             <div onClick={() => setShowPassword(!showPassword)}>
                                 {
                                     showPassword ? <>
